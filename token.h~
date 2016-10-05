@@ -1,0 +1,29 @@
+/*
+  ryan papazoglou
+  rpp219
+  CSE 109
+  Program 4
+  Desc:
+*/
+#ifndef LEXER_H
+#define LEXER_H
+
+class Lexer{
+private:
+  int type;
+  string lexeme;
+  int line;
+  int pos; //should be the pos of the first char of tok
+
+public:
+  int type();
+  string lexeme();
+  int line();
+  int pos();
+  Lexer(type, lexeme, line, pos);
+  ~Lexer();
+  
+};
+
+
+#endif

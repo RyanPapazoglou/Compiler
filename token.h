@@ -5,10 +5,24 @@
   Program 4
   Desc:
 */
-#ifndef LEXER_H
-#define LEXER_H
+//#ifndef LEXER_H
+//#define LEXER_H
 
-class Lexer{
+//#include <iostream>
+//#include <cstdlib>
+//#include <string.h>
+
+#ifndef TOKEN_H
+#define TOKEN_H
+
+#include <iostream>
+#include <istream>
+#include <cstdlib>
+#include <string.h>
+
+using namespace std;
+
+class Token{
 private:
   int type;
   string lexeme;
@@ -16,13 +30,13 @@ private:
   int pos; //should be the pos of the first char of tok
 
 public:
-  int type();
-  string lexeme();
-  int line();
-  int pos();
-  Lexer(type, lexeme, line, pos);
-  ~Lexer();
-
+  int getType();
+  string getLexeme();
+  int getLine();
+  int getPos();
+  Token(int ty, string lex, int curLine, int curPos);
+  ~Token();
+  
   static const int IDENT = 1;
   static const int INLIT = 2;
   static const int STRINGLIT = 3;
