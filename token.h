@@ -15,10 +15,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-#include <iostream>
-#include <istream>
 #include <cstdlib>
-#include <string.h>
+#include <string>
 
 using namespace std;
 
@@ -35,6 +33,7 @@ public:
   int getLine();
   int getPos();
   Token(int ty, string lex, int curLine, int curPos);
+  Token();
   ~Token();
   
   static const int IDENT = 1;

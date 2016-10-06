@@ -6,25 +6,22 @@
   desc:
 */
 
-#include <iosfwd>
 #include "token.h"
-#include <istream>
-#include <stdlib.h>
-#include <stdio.h>
 #include <iostream>
 #include "lexer.h"
+#include <cstdio>
+#include <cstdlib>
+#include <string.h>
 
 using namespace std;
 
-Lexer::Lexer(istream& st){
-  stream = st;
+Lexer::Lexer(istream& st):stream(st){
   line = 1;
   pos = 1;
   ch = nextChar();
 }
 
 Lexer::~Lexer(){
-  
 }
 
 char Lexer::nextChar(){
@@ -43,14 +40,12 @@ char Lexer::nextChar(){
 }
 
 Token Lexer::nextToken(){
-  //Token tok;
-  Token* tok;
   int lineNum;
   string lex;
   
   //Arrays that hold same index for comparison of keywords
-  string words[] = {"if", "else", "while", "function", "var", "printf", "return"};
-  int possTok[] = {Token::IF, Token::ELSE, Token::WHILE, Token::FUNCTION, Token::VAR, Token::PRINTF, Token::RETURN};
+  //string words[] = {"if", "else", "while", "function", "var", "printf", "return"};
+  //int possTok[] = {Token::IF, Token::ELSE, Token::WHILE, Token::FUNCTION, Token::VAR, Token::PRINTF, Token::RETURN};
   
   while(ch == ' '){
     ch = nextChar();
@@ -66,25 +61,25 @@ Token Lexer::nextToken(){
     case '+':
       //Do this for rest of cases
       ch = nextChar();
-      return new Token(Token::PLUS, lex, lineNum, pos);
+      return Token(Token::PLUS, lex, lineNum, pos);
       break;
-    case '-': return new Token(Token::MINUS, lex, lineNum, pos);
+    case '-': return Token(Token::MINUS, lex, lineNum, pos);
       break;
-    case '*': return new Token(Token::TIMES, lex, lineNum, pos);
+    case '*': return Token(Token::TIMES, lex, lineNum, pos);
       break;
-    case '/': return new Token(Token::DIVIDE, lex, lineNum, pos);
+    case '/': return Token(Token::DIVIDE, lex, lineNum, pos);
       break;
-    case '(': return new Token(Token::LPAREN, lex, lineNum, pos);
+    case '(': return Token(Token::LPAREN, lex, lineNum, pos);
       break;
-    case ')': return new Token(Token::RPAREN, lex, lineNum, pos);
+    case ')': return Token(Token::RPAREN, lex, lineNum, pos);
       break;
-    case '{': return new Token(Token::LBRACE, lex, lineNum, pos);
+    case '{': return Token(Token::LBRACE, lex, lineNum, pos);
       break;
-    case '}': return new Token(Token::RBRACE, lex, lineNum, pos);
+    case '}': return Token(Token::RBRACE, lex, lineNum, pos);
       break;
-    case ',': return new Token(Token::COMMA, lex, lineNum, pos);
+    case ',': return Token(Token::COMMA, lex, lineNum, pos);
       break;
-    case ';': return new Token(Token::SEMICOLON, lex, lineNum, pos);
+    case ';': return Token(Token::SEMICOLON, lex, lineNum, pos);
       break;
     }
   }
@@ -96,12 +91,10 @@ Token Lexer::nextToken(){
     ch = nextChar();
     if(ch == '='){
       lex+=ch;
-      tok = new Token(Token::EQ, lex, lineNum, pos);
-      return tok;
+      return Token(Token::EQ, lex, lineNum, pos);
     }else{
-      tok = new Token(Token::ASSIGN, lex, lineNum, pos);
       ch = nextChar();
-      return tok;
+      return Token(Token::ASSIGN, lex, lineNum, pos);
     }
     //ch = nextChar();
   }
@@ -113,12 +106,10 @@ Token Lexer::nextToken(){
     ch = nextChar();
     if(ch == '='){
       lex+=ch;
-      tok = new Token(Token::LE, lex, lineNum, pos);
-      return tok;
+      return Token(Token::LE, lex, lineNum, pos);
     }else{
-      tok = new Token(Token::LT, lex, lineNum, pos);
       ch = nextChar();
-      return tok;
+      return Token(Token::LT, lex, lineNum, pos);
     }
   }
 
@@ -129,13 +120,11 @@ Token Lexer::nextToken(){
     ch = nextChar();
     if(ch == '='){
       lex+=ch;
-      tok = new Token(Token::GE, lex, lineNum, pos);
+      return Token(Token::GE, lex, lineNum, pos);
       //ch = nextChar(); -- Do we need?
-      return tok;
     }else{
-      tok = new Token(Token::GT, lex, lineNum, pos);
       ch = nextChar();
-      return tok;
+      return Token(Token::GT, lex, lineNum, pos);
     }
   }
 
@@ -146,14 +135,13 @@ Token Lexer::nextToken(){
     ch = nextChar();
     if(ch == '&'){
       lex+=ch;
-      tok = new Token(Token::AND, lex, lineNum, pos);
-      ch == nextChar();
-      return tok;
+      ch = nextChar();
+      return Token(Token::AND, lex, lineNum, pos);
     }else{
       //Check this for pos errors
       //Do we need to write to cout and return an error token?
       cout << "Invalid Token: " << lex << " " << lineNum << " " << pos << endl;
-      return new Token(Token::ERROR, lex, pos, lineNum);
+      return Token(Token::ERROR, lex, pos, lineNum);
     }
   }
 
@@ -164,12 +152,11 @@ Token Lexer::nextToken(){
     ch = nextChar();
     if(ch == '|'){
       lex+=ch;
-      tok = new Token(Token::OR, lex, lineNum, pos);
+      return Token(Token::OR, lex, lineNum, pos);
       //ch = nextChar();
-      return tok;
     }else{
       cout << "Invalid Token: "<< lex << " " << lineNum << " " + pos << endl;
-      return new Token(Token::ERROR, lex, pos, lineNum);
+      return Token(Token::ERROR, lex, pos, lineNum);
     }
   }
 
@@ -180,17 +167,16 @@ Token Lexer::nextToken(){
     ch=nextChar();
     if(ch == '='){
       lex+=ch;
-      tok = new Token(Token::NE, lex, lineNum, pos);
+      return Token(Token::NE, lex, lineNum, pos);
       //ch = nextChar();
-      return tok;
     }else{
       cout << "Invalid Token: " << lex << " " << lineNum << " " + pos << endl;
-      return new Token(Token::ERROR, lex, pos, lineNum);
+      return Token(Token::ERROR, lex, pos, lineNum);
     }
   }
   
   //STRINGLIT
-  if(ch = '"'){
+  if(ch == '"'){
     ch=nextChar();
     pos++;
     while(ch != '"'){
@@ -199,8 +185,7 @@ Token Lexer::nextToken(){
       lineNum = line;
       ch=nextChar();
     }
-    tok = new Token(Token::STRINGLIT, lex, lineNum, pos);
-    return tok;
+    return Token(Token::STRINGLIT, lex, lineNum, pos);
   } 
 
   //IDENT
@@ -213,42 +198,34 @@ Token Lexer::nextToken(){
     }
     //KEYWORDS
     if(lex == "if"){
-      tok = new Token(Token::IF, lex, lineNum, pos);
-      return tok;
+      return Token(Token::IF, lex, lineNum, pos);
     }
 
     if(lex == "else"){
-      tok = new Token(Token::ELSE, lex, lineNum, pos);
-      return tok;
+      return Token(Token::ELSE, lex, lineNum, pos);
     }
 
     if(lex == "while"){
-      tok = new Token(Token::WHILE, lex, lineNum, pos);
-      return tok;
+      return Token(Token::WHILE, lex, lineNum, pos);
     }
 
     if(lex == "function"){
-      tok = new Token(Token::FUNCTION, lex, lineNum, pos);
-      return tok;
+      return Token(Token::FUNCTION, lex, lineNum, pos);
     }
 
     if(lex == "var"){
-      tok = new Token(Token::VAR, lex, lineNum, pos);
-      return tok;
+      return Token(Token::VAR, lex, lineNum, pos);
     }
 
     if(lex == "printf"){
-      tok = new Token(Token::PRINTF, lex, lineNum, pos);
-      return tok;
+      return Token(Token::PRINTF, lex, lineNum, pos);
     }
 
     if(lex == "return"){
-      tok = new Token(Token::RETURN, lex, lineNum, pos);
-      return tok;
+      return Token(Token::RETURN, lex, lineNum, pos);
     }
     
-    tok = new Token(Token::IDENT, lex, lineNum, pos);
-    return tok;
+    return Token(Token::IDENT, lex, lineNum, pos);
   }
 
 
@@ -260,8 +237,7 @@ Token Lexer::nextToken(){
       lex+= ch;
       ch = nextChar();
     }
-    tok = new Token(Token::INLIT, lex, lineNum, pos);
-    return tok;
+    return Token(Token::INLIT, lex, lineNum, pos);
   }
 
   //Check if we've received the endfile char
@@ -269,6 +245,6 @@ Token Lexer::nextToken(){
   //if all fails, return an error
   cout << "Invalid Token: " << lex << " " << lineNum << " " << pos << endl;
   exit(1);
-  return new Token(Token::ERROR, lex, lineNum, pos);
+  return Token(Token::ERROR, lex, lineNum, pos);
   
 }

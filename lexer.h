@@ -15,10 +15,10 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <iosfwd>
-#include <iostream>
+#include <string.h>
 #include <cstdlib>
-#include <stdio.h>
+#include <cstdio>
+#include <iostream>
 #include "token.h"
 
 using namespace std;
@@ -26,6 +26,7 @@ using namespace std;
 class Lexer{
 public:
   Lexer(istream& st);
+  ~Lexer();
   istream& stream;
   int line;
   int pos;

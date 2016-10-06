@@ -5,8 +5,12 @@
   Program 4
   Desc:
 */
-#include "lexer.h"
-#include <stdlib>
+
+#include <cstdlib>
+#include "token.h"
+#include <string>
+
+using namespace std;
 
 Token::Token(int ty, string lex, int curLine, int curPos){
   type = ty;
@@ -15,19 +19,26 @@ Token::Token(int ty, string lex, int curLine, int curPos){
   pos = curPos;
 }
 
-int::getType() {
+Token::Token(){
+  type = 0;
+  lexeme = "";
+  line = 1;
+  pos = 1;
+}
+
+int Token::getType() {
   return type;
 }
 
-string::getLexeme(){
+string Token::getLexeme(){
   return lexeme;
 }
 
-int::getLine(){
+int Token::getLine(){
   return line;
 }
 
-int::getPos(){
+int Token::getPos(){
   return pos;
 }
 
