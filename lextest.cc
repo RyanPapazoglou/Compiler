@@ -17,7 +17,6 @@ void processFile(istream& in) {
   }
 }
 
-
 int main(int argc, char **argv) {
   ifstream in;
 

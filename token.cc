@@ -20,10 +20,10 @@ Token::Token(int ty, string lex, int curLine, int curPos){
 }
 
 Token::Token(){
-  type = 0;
+  /*type = 0;
   lexeme = "";
   line = 1;
-  pos = 1;
+  pos = 1;*/
 }
 
 int Token::getType() {
