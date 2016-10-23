@@ -18,7 +18,7 @@ using namespace std;
 
 Lexer::Lexer(istream& st):stream(st){
   line = 1;
-  pos = 0;
+  pos = 1;
   ch = nextChar();
 }
 
@@ -27,29 +27,28 @@ Lexer::~Lexer(){
 
 char Lexer::nextChar(){
   char next = stream.get();
-  //int curPos = 1;
-  pos++;
-  if(next == '\n'){
-    line++;
-    pos = 0;
-    return ' ';
-  }else if(stream.eof()){
+    if(next == '\n'){
+      line++;
+      pos = 1;
+      return ' ';
+    }else if(next == EOF){
       return '#';
-  }else{
-    //curPos++;
-    
-    return next;
-  }
+    }else if(next == ' '){
+      pos++;
+      return '*';
+    }else{
+      pos++;
+      return next;
+    }
 }
 
 Token Lexer::nextToken(){
   int lineNum;
   string lex;
-  //ch = nextChar();
-  while((ch == ' ') || (ch == '\t')){
+
+  if(ch == '*'){
     ch = nextChar();
   }
-    
   
   //OPERATORS
   if(ispunct(ch)){
@@ -109,18 +108,18 @@ Token Lexer::nextToken(){
       ch = nextChar();
       if(ch == '='){
 	lex+=ch;
-	return Token(Token::GE, lex, lineNum, pos);
+	return Token(Token::LE, lex, lineNum, pos);
       }else{
-	return Token(Token::GT, lex, lineNum, pos);
+	return Token(Token::LT, lex, lineNum, pos);
       }
       break;
     case '<':
       ch = nextChar();
       if(ch == '='){
 	lex+=ch;
-	return Token(Token::LE, lex, lineNum, pos);
+	return Token(Token::GE, lex, lineNum, pos);
       }else{
-	return Token(Token::LT, lex, lineNum, pos);
+	return Token(Token::GT, lex, lineNum, pos);
       }
       break;
     case '&':
@@ -130,8 +129,7 @@ Token Lexer::nextToken(){
 	return Token(Token::AND, lex, lineNum, pos);
       }else{
 	ch = nextChar();
-	//cout << "Invalid Token: " << lex << " " << lineNum << " " << pos << endl;
-	return Token(Token::ERROR, lex, lineNum, pos);
+	cout << "Invalid Token: " << lex << " " << lineNum << " " << pos << endl;
       }
       break;
     case '|':
@@ -141,8 +139,7 @@ Token Lexer::nextToken(){
 	return Token(Token::OR, lex, lineNum, pos);
       }else{
 	ch = nextChar();
-	//cout << "Invalid Token: "<< lex << " " << lineNum << " " + pos << endl;
-	return Token(Token::ERROR, lex, lineNum, pos);
+	cout << "Invalid Token: "<< lex << " " << lineNum << " " + pos << endl;
       }
       break;
     case '!':
@@ -152,8 +149,7 @@ Token Lexer::nextToken(){
 	return Token(Token::NE, lex, lineNum, pos);
       }else{
 	ch = nextChar();
-	//cout << "Invalid Token: " << lex << " " << lineNum << " " + pos << endl;
-	return Token(Token::ERROR, lex, lineNum, pos);
+	cout << "Invalid Token: " << lex << " " << lineNum << " " + pos << endl;
       }
       break;
     case '"':
@@ -163,7 +159,6 @@ Token Lexer::nextToken(){
 	lineNum = line;
 	ch=nextChar();
       }
-      lex += ch;
       ch = nextChar();
       return Token(Token::STRINGLIT, lex, lineNum, pos);
       break;
@@ -171,7 +166,7 @@ Token Lexer::nextToken(){
   }
 
   if(ch == '#'){
-    //ch = nextChar();
+    ch = nextChar();
     return Token(Token::ENDOFFILE, lex, lineNum, pos);
   }
 
@@ -216,12 +211,12 @@ Token Lexer::nextToken(){
 
 
   //INLIT
-  if(ch >= '0' && ch <= '9'){
-    while(ch >= '0' && ch <= '9'){
+  if(ch >= 0 && ch <= 9){
+    while(ch >= 0 && ch <= 9){
       lineNum = line;
       lex+= ch;
       ch = nextChar();
-    }
+      }
     return Token(Token::INLIT, lex, lineNum, pos);
   }
   ch = nextChar();
