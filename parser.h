@@ -1,3 +1,11 @@
+/*
+  Ryan Papazoglou
+  rpp219
+  cse109
+  Prog 5
+  Desc: The structure for the parser file
+ */
+
 #ifndef PARSER_H
 #define PARSER_H
 
@@ -104,7 +112,7 @@ private:
   void check(int tokenType, string message);
   
  public:
-  TreeNode* funcall(string functionName)
+  TreeNode* funcall(string functionName);
   TreeNode* factor();
   TreeNode* term();
   TreeNode* expression();

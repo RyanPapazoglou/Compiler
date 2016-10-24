@@ -18,7 +18,7 @@ using namespace std;
 
 Lexer::Lexer(istream& st):stream(st){
   line = 1;
-  pos = 0;
+  pos = 1;
   ch = nextChar();
 }
 
@@ -31,7 +31,7 @@ char Lexer::nextChar(){
   pos++;
   if(next == '\n'){
     line++;
-    pos = 0;
+    pos = 1;
     return ' ';
   }else if(stream.eof()){
       return '#';
@@ -55,6 +55,7 @@ Token Lexer::nextToken(){
   if(ispunct(ch)){
     lineNum = line;
     lex += ch;
+    //ch = nextChar();
     switch(ch){
     case '+':
       ch = nextChar();
@@ -98,40 +99,54 @@ Token Lexer::nextToken(){
       break;
     case '=':
       ch = nextChar();
-      if(ch == '='){
+      if(ch != '='){
+	//lex+=ch;
+	return Token(Token::ASSIGN, lex, lineNum, pos);
+	break;
+      }else{	
 	lex+=ch;
 	return Token(Token::EQ, lex, lineNum, pos);
-      }else{
-	return Token(Token::ASSIGN, lex, lineNum, pos);
+	break;
       }
       break;
     case '>':
       ch = nextChar();
-      if(ch == '='){
-	lex+=ch;
-	return Token(Token::GE, lex, lineNum, pos);
-      }else{
+      if(ch != '='){
+	//lex+=ch;
 	return Token(Token::GT, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	return Token(Token::GE, lex, lineNum, pos);
+	break;
       }
       break;
     case '<':
       ch = nextChar();
-      if(ch == '='){
-	lex+=ch;
-	return Token(Token::LE, lex, lineNum, pos);
-      }else{
+      if(ch != '='){
+	//lex+=ch;
 	return Token(Token::LT, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	return Token(Token::LE, lex, lineNum, pos);
+	break;
       }
       break;
     case '&':
       ch = nextChar();
-      if(ch == '&'){
-	lex+=ch;
-	return Token(Token::AND, lex, lineNum, pos);
+      if(ch != '&'){
+	//lex+=ch;
+	//return Token(Token::ERROR, lex, lineNum, pos);
+	break;
       }else{
+	lex+=ch;
 	ch = nextChar();
 	//cout << "Invalid Token: " << lex << " " << lineNum << " " << pos << endl;
-	return Token(Token::ERROR, lex, lineNum, pos);
+	return Token(Token::AND, lex, lineNum, pos);
+	break;
       }
       break;
     case '|':
@@ -139,10 +154,12 @@ Token Lexer::nextToken(){
       if(ch == '|'){
 	lex+=ch;
 	return Token(Token::OR, lex, lineNum, pos);
+	break;
       }else{
 	ch = nextChar();
 	//cout << "Invalid Token: "<< lex << " " << lineNum << " " + pos << endl;
 	return Token(Token::ERROR, lex, lineNum, pos);
+	break;
       }
       break;
     case '!':

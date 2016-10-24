@@ -10,7 +10,7 @@ void processFile(istream& in) {
   Lexer lexer(in);
   Token token;
   Parser parser(lexer, cout);
-  Parser::TreeNode* program = parser.compilationunit();
+  Parser::TreeNode* program = parser.statement();
   cout << Parser::TreeNode::toString(program) << endl;
 }
 
