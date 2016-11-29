@@ -1,5 +1,5 @@
 #include "link.h"
-#include <string>
+//#include <string>
 
 Link::Link(string k, string d, Link* nx):key(k),data(d),next(nx){}
 

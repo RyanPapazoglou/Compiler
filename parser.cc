@@ -11,6 +11,7 @@
 #include "SymbolTable.h"
 #include <cstring>
 #include <string>
+#include <iostream>
 
 
 const string Parser::ops[] = {"ADD", "SUB", "MULT", "DIV",
@@ -42,8 +43,8 @@ void Parser::check(int tokenType, string message) {
     error(message);
 }
 
-void Parser::emit(){
-
+void Parser::emit(string asmb){
+  cout << asmb << endl;
 }
 
 void Parser::geninst(TreeNode *node){
@@ -51,9 +52,9 @@ void Parser::geninst(TreeNode *node){
 }
 
 void Parser::genasm(TreeNode *node){
-  cout << "    global main" << endl;
-  cout << "    extern printf" << endl;
-  cout << "    segment .bss" << endl;
+  emit("  global main");
+  emit("  extern printf");
+  emit("  segment .bss");
 }
 
 Parser::TreeNode* Parser::factor() {
@@ -121,6 +122,10 @@ Parser::TreeNode* Parser::expression() {
     switch(token.getType()){
     case Token::PLUS:
       node = new TreeNode(Parser::ADD, node, term());
+      emit("  pop rbx");
+      emit("  pop rax");
+      emit("  add rax, rbx");
+      emit("  push rax");
       break;
     case Token::MINUS:
       node = new TreeNode(Parser::SUB, node, term());
@@ -182,6 +187,8 @@ Parser::TreeNode* Parser::logicalExpression() {
 
 Parser::TreeNode* Parser::assignStatement() {
   TreeNode* node = NULL;
+  check(Token::IDENT, "Expecting identifier");
+  token = lexer.nextToken();
   check(Token::ASSIGN, "Expected token of type ASSIGN");
   token = lexer.nextToken();
   node = logicalExpression();
@@ -250,7 +257,7 @@ Parser::TreeNode* Parser::statement() {
   TreeNode* node = NULL;
   
   switch(token.getType()){
-  case Token::ASSIGN:
+  case Token::IDENT:
     node = assignStatement();
     break;
   case Token::IF:
@@ -294,6 +301,7 @@ Parser::TreeNode* Parser::block() {
 Parser::TreeNode* Parser::function() {
   check(Token::FUNCTION, "Missing function keyword");
   token = lexer.nextToken();
+  check(Token::IDENT, "Missing function name");
   string funcname = token.getLexeme();
   TreeNode* funcNode = new TreeNode(Parser::FUNC, funcname);
   token = lexer.nextToken();
@@ -306,17 +314,20 @@ Parser::TreeNode* Parser::function() {
   }else{
     //Read in parameters
     funcNode = new TreeNode(Parser::SEQ, funcNode, parameterdefs());
-    
+    funcNode = new TreeNode(Parser::SEQ, funcNode, block());
   }
   
   return funcNode;
 }
 
 Parser::TreeNode* Parser::compilationUnit() {
-  TreeNode* node = new TreeNode(Parser::SEQ);
-  while(token.getType() == Token::FUNCTION){
+  if(token.getType() != Token::FUNCTION){
+    return new TreeNode(Parser::SEQ);
+  }
+  TreeNode* node = function();
+  while(token.getType() != Token::ENDOFFILE){
     //check(Token::FUNCTION, "Invalid function declaration");
-    node = function();
+    node = new TreeNode(Parser::SEQ, node, function());
   }
   return node;
 }
@@ -357,7 +368,7 @@ Parser::TreeNode* Parser::vardefStatement() {
 Parser::TreeNode* Parser::parameterdef(){
   check(Token::IDENT, "Invalid parameter");
   string param = token.getLexeme();
-  TreeNode* paramNode = new TreeNode(Parser::PARAM, param);
+  TreeNode* paramNode = new TreeNode(Parser::STORE, param);
   token = lexer.nextToken();
   return paramNode;
 }
@@ -369,6 +380,7 @@ Parser::TreeNode* Parser::parameterdefs(){
     token = lexer.nextToken();
     params = new TreeNode(Parser::SEQ, params, parameterdef());
     }
+    token = lexer.nextToken();
   }
   return params;
 }

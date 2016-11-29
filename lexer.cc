@@ -228,7 +228,7 @@ Token Lexer::nextToken(){
     if(lex == "return"){
       return Token(Token::RETURN, lex, lineNum, pos);
     }
-    ch = nextChar();
+    // ch = nextChar();
     return Token(Token::IDENT, lex, lineNum, pos);
   }
 

@@ -16,6 +16,7 @@
 
 SymbolTable::SymbolTable(){
   index = 0;
+  symbolTable = Stack<HashTable>();
 }
 
 void SymbolTable::enterScope(){

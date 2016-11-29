@@ -134,10 +134,10 @@ private:
   TreeNode* parameterdef();
   TreeNode* parameterdefs();
   TreeNode* function();
-  TreeNode* compilationUnit();  
+  TreeNode* compilationUnit();
   void genasm(TreeNode *node);
   void geninst(TreeNode *node);
-  void emit();
+  void emit(string);
     
   Parser(Lexer& lexer, ostream& out);
   ~Parser(); 
