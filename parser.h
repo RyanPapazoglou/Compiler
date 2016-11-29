@@ -11,6 +11,7 @@
 
 #include "token.h"
 #include "lexer.h"
+#include "SymbolTable.h"
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -30,7 +31,8 @@ private:
     PUSHL, PUSHV, STORE, // Value Transfer Instructions
     JUMP, JUMPF, JUMPT, CALL, RET, // Location Transfer Instructions
     PRINTF, // Misc
-    LABEL, SEQ // Pseudo Operations
+    LABEL, SEQ, // Pseudo Operations
+    PARAM, FUNC
   };
   
 public:  
@@ -103,7 +105,9 @@ private:
   ostream& out;
   int lindex;
   int tindex;
-  
+  SymbolTable* symbolTable;
+
+  //string itos(int i) { stringstream ss; ss << i; string res = ss.str(); return res;}
   string itos(int i) { stringstream ss; ss << i; string res = ss.str(); return res;}
   string makeLabel() { string tmp = "L"; stringstream ss; ss << ++lindex; string res = ss.str(); tmp = tmp + res; return tmp;}
 
@@ -130,12 +134,14 @@ private:
   TreeNode* parameterdef();
   TreeNode* parameterdefs();
   TreeNode* function();
-  TreeNode* compilationunit();  
-  
+  TreeNode* compilationUnit();  
+  void genasm(TreeNode *node);
+  void geninst(TreeNode *node);
+  void emit();
     
   Parser(Lexer& lexer, ostream& out);
   ~Parser(); 
-
+  //static const string ops[];
 };
 
 #endif

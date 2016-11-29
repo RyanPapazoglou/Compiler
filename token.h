@@ -37,7 +37,7 @@ public:
   ~Token();
   
   static const int IDENT = 1;
-  static const int INLIT = 2;
+  static const int INTLIT = 2;
   static const int STRINGLIT = 3;
   static const int PLUS = 4;
   static const int MINUS = 5;

@@ -105,6 +105,7 @@ Token Lexer::nextToken(){
 	break;
       }else{	
 	lex+=ch;
+	ch = nextChar();
 	return Token(Token::EQ, lex, lineNum, pos);
 	break;
       }
@@ -194,7 +195,7 @@ Token Lexer::nextToken(){
 
   //IDENT
   if((ch>='a' && ch<='z') || (ch >= 'A' && ch <= 'Z')){
-    while(isalpha(ch)){
+    while(isalpha(ch) || isdigit(ch)){
       lex+=ch;
       lineNum=line;
       ch=nextChar();
@@ -227,19 +228,20 @@ Token Lexer::nextToken(){
     if(lex == "return"){
       return Token(Token::RETURN, lex, lineNum, pos);
     }
-    
+    ch = nextChar();
     return Token(Token::IDENT, lex, lineNum, pos);
   }
 
 
-  //INLIT
+  //INTLIT
   if(ch >= '0' && ch <= '9'){
     while(ch >= '0' && ch <= '9'){
       lineNum = line;
       lex+= ch;
       ch = nextChar();
     }
-    return Token(Token::INLIT, lex, lineNum, pos);
+    //ch = nextChar();
+    return Token(Token::INTLIT, lex, lineNum, pos);
   }
   ch = nextChar();
   return Token(Token::ERROR, lex, lineNum, pos);
