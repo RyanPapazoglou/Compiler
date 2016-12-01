@@ -12,7 +12,6 @@
 #include <cstring>
 #include <string>
 #include <iostream>
-#include <sstream>
 
 
 const string Parser::ops[] = {"ADD", "SUB", "MULT", "DIV",
@@ -49,111 +48,13 @@ void Parser::emit(string asmb){
 }
 
 void Parser::geninst(TreeNode *node){
-  if(node->leftChild != NULL){
-    geninst(node->leftChild);
-  }
-  if(node->rightChild != NULL){
-    geninst(node->rightChild);
-  }
-  
-  /*if(node != NULL){
-    geninst(node->leftChild);
-    geninst(node->rightChild);
-  }*/
-  
-  switch(node->op){
-  case Parser::ADD:
-    emit("  pop rbx");
-    emit("  pop rax");
-    emit("  add rax,rbx");
-    emit("  push rax");
-    break;
-  case Parser::SUB:
-    emit("  pop rbx");
-    emit("  pop rax");
-    emit("  sub rax,rbx");
-    emit("  push rax");
-    break;
-  case Parser::AND:
-    emit("  pop rbx");
-    emit("  pop rax");
-    emit("  and rax,rbx");
-    emit("  push rax");
-    break;
-  case Parser::OR:
-    emit("  pop rbx");
-    emit("  pop rax");
-    emit("  or rax,rbx");
-    emit("  push rax");
-    break;
-  case Parser::MULT:
-    emit("  pop rbx");
-    emit("  pop rax");
-    emit("  imul rbx");
-    emit("  push rax");
-    break;
-  case Parser::DIV:
-    emit("  mov rdx,0");
-    emit("  pop rbx");
-    emit("  pop rax");
-    emit("  idiv rbx");
-    emit("  push rax");
-    break;
-  case Parser::LABEL:
-    emit(node->val + ":");
-    break;
-  case Parser::ISEQ:
-    isLabelGen("je");
-    break;
-  case Parser::ISNE:
-    isLabelGen("jne");
-    break;
-  case Parser::ISLT:
-    isLabelGen("jl");
-    break;
-  case Parser::ISLE:
-    isLabelGen("jle");
-    break;
-  case Parser::ISGT:
-    isLabelGen("jg");
-    break;
-  case Parser::ISGE:
-    isLabelGen("jge");
-    break;
-  case Parser::JUMP:
-    emit("  jmp " + node->val);
-    break;
-  case Parser::JUMPF:
-    emit("  pop rax");
-    emit("  cmp rax,0");
-    emit(" je " + node->val);
-    break;
-  case Parser::JUMPT:
-    emit("  pop rax");
-    emit("  cmp rax,0");
-    emit("  jne " + node->val);
-    break;
-  default:
-    break;
-  }
-}
-
-
-void Parser::vardefs(TreeNode *node){
-
-  
 
 }
-  
+
 void Parser::genasm(TreeNode *node){
-  emit("global main");
-  emit("extern printf");
-  emit("segment .bss");
-  emit("section .data");
-  emit("fmt: db '%ld ', 0");
-  emit("endl: db 10, 0");
-  emit("section .text");
-  geninst(node);
+  emit("  global main");
+  emit("  extern printf");
+  emit("  segment .bss");
 }
 
 Parser::TreeNode* Parser::factor() {
@@ -161,15 +62,11 @@ Parser::TreeNode* Parser::factor() {
   string sym = "";
   switch(token.getType()){
   case Token::IDENT:
-    //sym = token.getLexeme();
+    sym = token.getLexeme();
     if(symbolTable->getUniqueSymbol(sym) == ""){
-      sym = token.getLexeme();
-      sym = symbolTable->addSymbol(sym);
-    }else {
-      //error("Var already exists");
-      sym = symbolTable->getUniqueSymbol(sym);
+      error("Var already exists");
     }
-   
+    sym = symbolTable->getUniqueSymbol(sym);
     token = lexer.nextToken();
     if(token.getType() == Token::LPAREN){
       node = funcall(sym);
@@ -224,15 +121,13 @@ Parser::TreeNode* Parser::expression() {
   while((token.getType() == Token::PLUS) || (token.getType() == Token::MINUS)){
     switch(token.getType()){
     case Token::PLUS:
-      token = lexer.nextToken();
       node = new TreeNode(Parser::ADD, node, term());
       break;
     case Token::MINUS:
-      token = lexer.nextToken();
       node = new TreeNode(Parser::SUB, node, term());
       break;
     }
-    //token = lexer.nextToken();
+    token = lexer.nextToken();
   }
   return node;
 }
@@ -289,15 +184,6 @@ Parser::TreeNode* Parser::logicalExpression() {
 Parser::TreeNode* Parser::assignStatement() {
   TreeNode* node = NULL;
   check(Token::IDENT, "Expecting identifier");
-  string sym;
-  if(symbolTable->getUniqueSymbol(sym) == ""){
-    sym = token.getLexeme();
-    sym = symbolTable->addSymbol(sym);
-  }else {
-    //error("Var already exists");
-    sym = symbolTable->getUniqueSymbol(sym);
-  }
-  sym = symbolTable->addSymbol(sym);
   token = lexer.nextToken();
   check(Token::ASSIGN, "Expected token of type ASSIGN");
   token = lexer.nextToken();
@@ -381,44 +267,11 @@ Parser::TreeNode* Parser::statement() {
     break;
   case Token::RETURN:
     node = returnStatement();
-    /*case Token::PRINTF:
-    node = printfStatement();
-    */
-    default:
+  default:
     error("Not a statement type");
     break;
   }
   return node;
-}
-
-
-Parser::TreeNode* Parser::printfStatement() {
-  TreeNode* paramList = NULL;
-  int nparams = 0;
-  check(Token::PRINTF, "Expecting printf");
-  token = lexer.nextToken();
-  check(Token::LPAREN, "Expecting (");
-  token = lexer.nextToken();
-  check(Token::STRINGLIT, "Expecting string literal");
-  string formatString = token.getLexeme();
-  token = lexer.nextToken();
-  if (token.getType() == Token::COMMA) {
-    token = lexer.nextToken();
-    paramList = expression();
-    ++nparams;
-    while (token.getType() == Token::COMMA) {
-      token = lexer.nextToken();
-      paramList = new TreeNode(SEQ, paramList, expression());
-      ++nparams;
-    }
-  }
-  check(Token::RPAREN, "Expecting )");
-  token = lexer.nextToken();
-  check(Token::SEMICOLON, "Expecting ;");
-  token = lexer.nextToken();
-  TreeNode* printStatement =
-    new TreeNode(SEQ, paramList, new TreeNode(PRINTF, itos(nparams) + formatString));
-  return printStatement;
 }
 
 Parser::TreeNode* Parser::block() {
@@ -452,7 +305,6 @@ Parser::TreeNode* Parser::function() {
   token = lexer.nextToken();
   if(token.getType() == Token::RPAREN){
     symbolTable->enterScope();
-    token = lexer.nextToken();
     funcNode = new TreeNode(Parser::SEQ, funcNode, block());
     symbolTable->exitScope();
   }else{
@@ -473,11 +325,11 @@ Parser::TreeNode* Parser::compilationUnit() {
     //check(Token::FUNCTION, "Invalid function declaration");
     node = new TreeNode(Parser::SEQ, node, function());
   }
-  //genasm(node);
   return node;
 }
 
 Parser::TreeNode* Parser::funcall(string functionName){
+  //curToken ='('
   TreeNode* node = new TreeNode(Parser::CALL, functionName);
   token = lexer.nextToken();
   while(token.getType() != Token::RPAREN){
@@ -527,23 +379,4 @@ Parser::TreeNode* Parser::parameterdefs(){
     token = lexer.nextToken();
   }
   return params;
-}
-
-void Parser::isLabelGen(string op){
-  stringstream ss;
-  ss << "  " << "j" << labelCounter;
-  std::string lab1 = ss.str();
-  ss << "  " << "j" << labelCounter+1;
-  std::string lab2 = ss.str();
-  emit("  pop rbx");
-  emit("  pop rax");
-  emit("  cmp rax,rbx");
-  emit("  " + op + " " + lab1);
-  emit("  mov rax,0");
-  emit("  jmp " + lab2);
-  emit(lab1);
-  emit("  mov rax,1");
-  emit(lab2);
-  emit("  push rax");
-  labelCounter++;
 }

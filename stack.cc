@@ -7,7 +7,7 @@ Stack<T>::Stack(int n):size(n),tos(Stack<T>::EMPTY) {
 }
 
 template<class T>
-Stack<T>::Stack():size(10),tos(-1) {
+Stack<T>::Stack():size(10),tos(0) {
   stack = new T[size];
 }
 

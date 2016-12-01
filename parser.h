@@ -32,14 +32,14 @@ private:
     JUMP, JUMPF, JUMPT, CALL, RET, // Location Transfer Instructions
     PRINTF, // Misc
     LABEL, SEQ, // Pseudo Operations
-    PARAM, FUNC
+    FUNC
   };
   
 public:  
   class TreeNode {
     
   public:
-
+    
     Operation op;
     string val; // Variable name or jump label
     TreeNode *leftChild;
@@ -116,6 +116,7 @@ private:
   void check(int tokenType, string message);
   
  public:
+  int labelCounter;
   TreeNode* funcall(string functionName);
   TreeNode* factor();
   TreeNode* term();
@@ -138,7 +139,10 @@ private:
   void genasm(TreeNode *node);
   void geninst(TreeNode *node);
   void emit(string);
-    
+  void isLabelGen(string);
+  void vardefs(TreeNode *node);
+  
+  
   Parser(Lexer& lexer, ostream& out);
   ~Parser(); 
   //static const string ops[];

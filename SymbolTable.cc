@@ -12,6 +12,8 @@
 #include "hashTable.h"
 #include "hash.h"
 #include "parser.h"
+#include <sstream>
+
 
 
 SymbolTable::SymbolTable(){
@@ -32,7 +34,10 @@ int SymbolTable::addSymbol(string sym){
   if(topScope.inTable(sym)){
       return 0;
   }
-  symbolTable.peek().add(sym, (sym + "$" + itos(++index)));
+  stringstream ss;
+  ss << sym << "$" << itos(++index);
+  std::string key = ss.str();
+  symbolTable.peek().add(sym, key);
   return 1;
 }
 
