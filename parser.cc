@@ -29,6 +29,7 @@ const string Parser::ops[] = {"ADD", "SUB", "MULT", "DIV",
 Parser::Parser(Lexer& lexerx, ostream& outx): lexer(lexerx), out(outx), lindex(1), tindex(1) {
   token = lexer.nextToken();
   symbolTable = new SymbolTable();
+  
 }
 
 Parser::~Parser() {
@@ -47,6 +48,12 @@ void Parser::check(int tokenType, string message) {
 void Parser::emit(string asmb){
   cout << asmb << endl;
 }
+
+string currentFunc;
+int nfmts = 0;
+string fmts[100];
+string fmt;
+int nparams;
 
 void Parser::geninst(TreeNode *node){
   if(node->leftChild != NULL){
@@ -133,6 +140,64 @@ void Parser::geninst(TreeNode *node){
     emit("  cmp rax,0");
     emit("  jne " + node->val);
     break;
+  case Parser::PUSHV:
+    emit("  push qword[" + node->val + "]");
+    break;
+  case Parser::PUSHL:
+    emit("  mov rax," + node->val);
+    emit("  push rax");
+    break;
+  case Parser::STORE:
+    emit("  pop qword[" + node->val + "]");
+    break;
+  case Parser::PRINTF:
+    fmt = node->val;
+    nparams = fmt.at(0) - '0';
+    fmt = "`" + fmt.substr(1) + "`";
+    fmts[nfmts++] = fmt;
+    emit("  mov    rdi,fmt" + itos(nfmts));
+    if (nparams == 5) {
+      emit("  pop   r9");
+      --nparams;
+    }
+    if (nparams == 4) {
+      emit("  pop   r8");
+      --nparams;
+    }
+    if (nparams == 3) {
+      emit("  pop   rcx");
+      --nparams;
+    }
+    if (nparams == 2) {
+      emit("  pop   rdx");
+      --nparams;
+    }
+    if (nparams == 1) {
+      emit("  pop   rsi");
+    }
+    emit("  mov    rax,0");
+    emit("  push   rbp");
+    emit("  call   printf");
+    emit("  pop    rbp");
+    emit("  call   printf");
+    emit("  pop    rbp");
+    break;
+  case Parser::CALL:
+    emit("  call " + node->val);
+    emit("  push rax");
+    break;
+  case Parser::FUNC:
+    currentFunc = node->val;
+    emit(currentFunc);
+    if (currentFunc != "main:")
+      emit("  pop r15");
+    break;
+  case Parser::RET:
+    emit("  pop rax");
+    if (currentFunc != "main:")
+      emit("  push r15");
+    emit("  ret");
+    break;
   default:
     break;
   }
@@ -140,7 +205,28 @@ void Parser::geninst(TreeNode *node){
 
 
 void Parser::vardefs(TreeNode *node){
+  if(node->leftChild != NULL){
+    vardefs(node->leftChild);
+  }
+  if(node->rightChild != NULL){
+    vardefs(node->rightChild);
+  }
 
+  
+  int counter = 0;
+  switch(node->op){
+  case Parser::PUSHV:
+    vars[counter] = node->val;
+    emit("  "+vars[counter] + " resq 1");
+    break;
+  case Parser::STORE:
+    vars[counter] = node->val;
+    emit("  "+vars[counter] + " resq 1");
+    break;
+  default:
+    break;
+  }
+  
   
 
 }
@@ -149,34 +235,32 @@ void Parser::genasm(TreeNode *node){
   emit("global main");
   emit("extern printf");
   emit("segment .bss");
+  vardefs(node);
+  
   emit("section .data");
   emit("fmt: db '%ld ', 0");
   emit("endl: db 10, 0");
   emit("section .text");
   geninst(node);
+  
 }
 
 Parser::TreeNode* Parser::factor() {
   TreeNode* node = NULL;
-  string sym = "";
+  string prevtok;
   switch(token.getType()){
   case Token::IDENT:
-    //sym = token.getLexeme();
-    if(symbolTable->getUniqueSymbol(sym) == ""){
-      sym = token.getLexeme();
-      sym = symbolTable->addSymbol(sym);
-    }else {
-      //error("Var already exists");
-      sym = symbolTable->getUniqueSymbol(sym);
-    }
-   
+    prevtok =  token.getLexeme();
     token = lexer.nextToken();
     if(token.getType() == Token::LPAREN){
-      node = funcall(sym);
-    }else if(token.getType() == Token::ASSIGN){
-      node = statement();
+      node = funcall(prevtok);
+      return node;
     }else{
-      node = new TreeNode(Parser::PUSHV, sym);
+      node = new TreeNode(Parser::PUSHV, prevtok);
+      if(symbolTable->getUniqueSymbol(prevtok) == ""){
+	error("Variable not declared");
+      }
+      return node;
     }
     return node;
     break;
@@ -206,13 +290,15 @@ Parser::TreeNode* Parser::term() {
   while((token.getType() == Token::TIMES) || (token.getType() == Token::DIVIDE)){
     switch(token.getType()){
     case Token::TIMES:
+      token = lexer.nextToken();
       node = new TreeNode(Parser::MULT, node, factor());
       break;
     case Token::DIVIDE:
+      token = lexer.nextToken();
       node = new TreeNode(Parser::DIV, node, factor());
       break;
     }
-    token = lexer.nextToken();
+    
   }
   
   return node;
@@ -247,22 +333,27 @@ Parser::TreeNode* Parser::relationalExpression() {
 	node = new TreeNode(Parser::ISEQ, node, expression());
 	break;
       case Token::LT:
+	token = lexer.nextToken();
 	node = new TreeNode(Parser::ISLT, node, expression());
 	break;
       case Token::LE:
+	token = lexer.nextToken();
 	node = new TreeNode(Parser::ISLE, node, expression());
 	break;
       case Token::GT:
+	token = lexer.nextToken();
 	node = new TreeNode(Parser::ISGT, node, expression());
 	break;
       case Token::GE:
+	token = lexer.nextToken();
 	node = new TreeNode(Parser::ISGE, node, expression());
 	break;
       case Token::NE:
+	token = lexer.nextToken();
 	node = new TreeNode(Parser::ISNE, node, expression());
 	break;
     }
-    token = lexer.nextToken();
+    //token = lexer.nextToken();
   }
  
   return node; 
@@ -274,13 +365,15 @@ Parser::TreeNode* Parser::logicalExpression() {
   while((token.getType() == Token::AND) || (token.getType() == Token::OR)){
     switch(token.getType()){
     case Token::AND:
+      token = lexer.nextToken();
       node = new TreeNode(Parser::AND, node, relationalExpression());
       break;
     case Token::OR:
+      token = lexer.nextToken();
       node = new TreeNode(Parser::OR, node, relationalExpression());
       break;
     }
-    token = lexer.nextToken();
+    //token = lexer.nextToken();
   }
 
   return node;
@@ -289,15 +382,10 @@ Parser::TreeNode* Parser::logicalExpression() {
 Parser::TreeNode* Parser::assignStatement() {
   TreeNode* node = NULL;
   check(Token::IDENT, "Expecting identifier");
-  string sym;
-  if(symbolTable->getUniqueSymbol(sym) == ""){
-    sym = token.getLexeme();
-    sym = symbolTable->addSymbol(sym);
-  }else {
-    //error("Var already exists");
-    sym = symbolTable->getUniqueSymbol(sym);
+  
+  if(symbolTable->getUniqueSymbol(token.getLexeme()) == ""){
+    error("Variable not declared");
   }
-  sym = symbolTable->addSymbol(sym);
   token = lexer.nextToken();
   check(Token::ASSIGN, "Expected token of type ASSIGN");
   token = lexer.nextToken();
@@ -309,20 +397,23 @@ Parser::TreeNode* Parser::assignStatement() {
 
 Parser::TreeNode* Parser::whileStatement() {
   TreeNode* node = NULL;
-  token = lexer.nextToken();
+  
   check(Token::WHILE, "Expecting While");
   token = lexer.nextToken();
-  check(Token::RPAREN, "Expecting (");
+  check(Token::LPAREN, "Expecting (");
   string l1 = makeLabel();
   string l2 = makeLabel();
-  node = new TreeNode(Parser::SEQ, new TreeNode(Parser::LABEL, l1), logicalExpression());
+  TreeNode* lab1 = new TreeNode(Parser::LABEL, l1);
+  TreeNode* lab2 = new TreeNode(Parser::LABEL, l2);
+  token = lexer.nextToken();
+  node = new TreeNode(Parser::SEQ, lab1, logicalExpression());
   node = new TreeNode(Parser::SEQ, node, new TreeNode(Parser::JUMPF, l2));
+  token = lexer.nextToken();
   symbolTable->enterScope();
   node = new TreeNode(Parser::SEQ, node, block());
   symbolTable->exitScope();
   node = new TreeNode(Parser::SEQ, node, new TreeNode(Parser::JUMP, l1));
-  node = new TreeNode(Parser::SEQ, node, new TreeNode(Parser::LABEL, l2));
-  token = lexer.nextToken();
+  node = new TreeNode(Parser::SEQ, node, lab2);
   return node;
 }
 
@@ -335,12 +426,14 @@ Parser::TreeNode* Parser::ifStatement() {
   string l2 = makeLabel();
   token = lexer.nextToken();
   node = new TreeNode(Parser::SEQ, logicalExpression(), new TreeNode(Parser::JUMPF, l1));
+  token = lexer.nextToken();
   symbolTable->enterScope();
   node = new TreeNode(Parser::SEQ, node, block());
   symbolTable->exitScope();
   if(token.getType() == Token::ELSE){
     node = new TreeNode(Parser::SEQ, node, new TreeNode(Parser::JUMP, l2));
     node = new TreeNode(Parser::SEQ, node, new TreeNode(Parser::LABEL, l1));
+    token = lexer.nextToken();
     symbolTable->enterScope();
     node = new TreeNode(Parser::SEQ, node, block());
     symbolTable->exitScope();
@@ -348,7 +441,7 @@ Parser::TreeNode* Parser::ifStatement() {
   }else{
      node = new TreeNode(Parser::SEQ, node, new TreeNode(Parser::JUMP, l2));
   }
-  token = lexer.nextToken();
+  //token = lexer.nextToken();
   return node;
 }
 
@@ -381,10 +474,11 @@ Parser::TreeNode* Parser::statement() {
     break;
   case Token::RETURN:
     node = returnStatement();
-    /*case Token::PRINTF:
+    break;
+  case Token::PRINTF:
     node = printfStatement();
-    */
-    default:
+    break;
+  default:
     error("Not a statement type");
     break;
   }
@@ -428,16 +522,14 @@ Parser::TreeNode* Parser::block() {
   node = statement();
   if(token.getType() == Token::ENDOFFILE){
     return node;
-    /*}else if(token.getType() == Token::RBRACE){
-    check(Token::RBRACE, "Expected }");
-    return node = new TreeNode(Parser::SEQ);*/
   }else{
     while(token.getType() != Token::RBRACE){
       node = new TreeNode(Parser::SEQ, node, statement());
     }
+    check(Token::RBRACE, "Expecting }");
+    token = lexer.nextToken();
   }
-  check(Token::RBRACE, "Expecting }");
-  token = lexer.nextToken();
+  
   return node;
 }
 
@@ -512,6 +604,7 @@ Parser::TreeNode* Parser::vardefStatement() {
 Parser::TreeNode* Parser::parameterdef(){
   check(Token::IDENT, "Invalid parameter");
   string param = token.getLexeme();
+  symbolTable->addSymbol(param);
   TreeNode* paramNode = new TreeNode(Parser::STORE, param);
   token = lexer.nextToken();
   return paramNode;
@@ -530,20 +623,17 @@ Parser::TreeNode* Parser::parameterdefs(){
 }
 
 void Parser::isLabelGen(string op){
-  stringstream ss;
-  ss << "  " << "j" << labelCounter;
-  std::string lab1 = ss.str();
-  ss << "  " << "j" << labelCounter+1;
-  std::string lab2 = ss.str();
+  string lab1 = makeJumpLabel();
+  string lab2 = makeJumpLabel();
   emit("  pop rbx");
   emit("  pop rax");
   emit("  cmp rax,rbx");
   emit("  " + op + " " + lab1);
   emit("  mov rax,0");
   emit("  jmp " + lab2);
-  emit(lab1);
+  emit(lab1 + ":");
   emit("  mov rax,1");
-  emit(lab2);
+  emit(lab2 + ":");
   emit("  push rax");
   labelCounter++;
 }

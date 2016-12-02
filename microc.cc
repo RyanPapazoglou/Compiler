@@ -11,8 +11,8 @@ void processFile(istream& in) {
   Token token;
   Parser parser(lexer, cout);
   Parser::TreeNode* program = parser.compilationUnit();
-  cout << Parser::TreeNode::toString(program) << endl;
-  //parser.genasm(program);
+  //cout << Parser::TreeNode::toString(program) << endl;
+  parser.genasm(program);
 }
 
 int main(int argc, char **argv) {

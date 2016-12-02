@@ -105,11 +105,14 @@ private:
   ostream& out;
   int lindex;
   int tindex;
+  int jindex;
   SymbolTable* symbolTable;
+  string vars[100];
 
   //string itos(int i) { stringstream ss; ss << i; string res = ss.str(); return res;}
   string itos(int i) { stringstream ss; ss << i; string res = ss.str(); return res;}
   string makeLabel() { string tmp = "L"; stringstream ss; ss << ++lindex; string res = ss.str(); tmp = tmp + res; return tmp;}
+  string makeJumpLabel() { string tmp = "J"; stringstream ss; ss << ++jindex; string res = ss.str(); tmp = tmp + res; return tmp;}
 
   static const string ops[];  
   void error(string message);

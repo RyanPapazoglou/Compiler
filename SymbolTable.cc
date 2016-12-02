@@ -34,10 +34,7 @@ int SymbolTable::addSymbol(string sym){
   if(topScope.inTable(sym)){
       return 0;
   }
-  stringstream ss;
-  ss << sym << "$" << itos(++index);
-  std::string key = ss.str();
-  symbolTable.peek().add(sym, key);
+  symbolTable.peek().add(sym, (sym + "$" + itos(++index)));
   return 1;
 }
 
