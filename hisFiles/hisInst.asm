@@ -1,24 +1,29 @@
-global main
-extern printf
-segment .bss
+  global main
+  extern printf
+
+  segment .bss
   month$1 resq 1
   year$2 resq 1
   day$3 resq 1
   h$4 resq 1
   firstday$7 resq 1
   lastday$6 resq 1
-  row$10 resq 1
-  nrows$9 resq 1
-  colday$11 resq 1
+  tmp$8 resq 1
   dday$5 resq 1
+  nrows$9 resq 1
+  row$10 resq 1
+  colday$11 resq 1
   year$12 resq 1
   month$13 resq 1
-section .text
+
+  section .text
 main:
   mov rax,12
   push rax
+  pop qword[month$1]
   mov rax,2016
   push rax
+  pop qword[year$2]
   push qword[month$1]
   mov rax,1
   push rax
@@ -47,7 +52,7 @@ J4:
   push rax
   pop rbx
   pop rax
-  or rax,rbx
+  or  rax,rbx
   push rax
   pop rax
   cmp rax,0
@@ -59,6 +64,7 @@ J4:
   pop rax
   add rax,rbx
   push rax
+  pop qword[month$1]
   push qword[year$2]
   mov rax,1
   push rax
@@ -66,9 +72,11 @@ J4:
   pop rax
   sub rax,rbx
   push rax
+  pop qword[year$2]
 L2:
   mov rax,1
   push rax
+  pop qword[day$3]
   push qword[day$3]
   push qword[month$1]
   mov rax,1
@@ -141,6 +149,7 @@ L2:
   pop rax
   add rax,rbx
   push rax
+  pop qword[h$4]
   push qword[h$4]
   push qword[h$4]
   mov rax,7
@@ -160,6 +169,7 @@ L2:
   pop rax
   sub rax,rbx
   push rax
+  pop qword[firstday$7]
   push qword[month$1]
   mov rax,12
   push rax
@@ -175,7 +185,7 @@ J6:
   push rax
   pop rax
   cmp rax,0
-  je L4
+  je L3
   push qword[month$1]
   mov rax,12
   push rax
@@ -183,6 +193,7 @@ J6:
   pop rax
   sub rax,rbx
   push rax
+  pop qword[month$1]
   push qword[year$2]
   mov rax,1
   push rax
@@ -190,9 +201,11 @@ J6:
   pop rax
   add rax,rbx
   push rax
-L4:
+  pop qword[year$2]
+L3:
   mov rax,0
   push rax
+  pop qword[lastday$6]
   push qword[month$1]
   mov rax,4
   push rax
@@ -221,7 +234,7 @@ J10:
   push rax
   pop rbx
   pop rax
-  or rax,rbx
+  or  rax,rbx
   push rax
   push qword[month$1]
   mov rax,9
@@ -238,7 +251,7 @@ J12:
   push rax
   pop rbx
   pop rax
-  or rax,rbx
+  or  rax,rbx
   push rax
   push qword[month$1]
   mov rax,11
@@ -255,15 +268,16 @@ J14:
   push rax
   pop rbx
   pop rax
-  or rax,rbx
+  or  rax,rbx
   push rax
   pop rax
   cmp rax,0
-  je L6
+  je L5
   mov rax,30
   push rax
-  jmp L7
-L6:
+  pop qword[lastday$6]
+  jmp L4
+L5:
   push qword[month$1]
   mov rax,2
   push rax
@@ -279,29 +293,33 @@ J16:
   push rax
   pop rax
   cmp rax,0
-  je L8
+  je L7
   mov rax,31
   push rax
-  jmp L9
-L8:
+  pop qword[lastday$6]
+  jmp L6
+L7:
+  push qword[year$2]
   call leapyear
   push rax
-  push qword[year$2]
   pop rax
   cmp rax,0
-  je L10
+  je L9
   mov rax,29
   push rax
-  jmp L11
-L10:
+  pop qword[lastday$6]
+  jmp L8
+L9:
   mov rax,28
   push rax
-L11:
-L9:
-L7:
+  pop qword[lastday$6]
+L8:
+L6:
+L4:
+  push qword[month$1]
   call printmonth
   push rax
-  push qword[month$1]
+  pop qword[tmp$8]
   mov    rdi,fmt1
   mov    rax,0
   push   rbp
@@ -314,6 +332,7 @@ L7:
   pop rax
   sub rax,rbx
   push rax
+  pop qword[dday$5]
   push qword[firstday$7]
   push qword[lastday$6]
   pop rbx
@@ -333,9 +352,11 @@ L7:
   pop rax
   add rax,rbx
   push rax
+  pop qword[nrows$9]
   mov rax,1
   push rax
-L12:
+  pop qword[row$10]
+L14:
   push qword[row$10]
   push qword[nrows$9]
   pop rbx
@@ -350,10 +371,11 @@ J18:
   push rax
   pop rax
   cmp rax,0
-  je L13
+  je L15
   mov rax,1
   push rax
-L14:
+  pop qword[colday$11]
+L12:
   push qword[colday$11]
   mov rax,7
   push rax
@@ -369,7 +391,7 @@ J20:
   push rax
   pop rax
   cmp rax,0
-  je L15
+  je L13
   push qword[dday$5]
   mov rax,1
   push rax
@@ -397,18 +419,18 @@ J24:
   push rax
   pop rbx
   pop rax
-  or rax,rbx
+  or  rax,rbx
   push rax
   pop rax
   cmp rax,0
-  je L16
+  je L11
   mov    rdi,fmt2
   mov    rax,0
   push   rbp
   call   printf
   pop    rbp
-  jmp L17
-L16:
+  jmp L10
+L11:
   push qword[dday$5]
   mov    rdi,fmt3
   pop   rsi
@@ -416,7 +438,7 @@ L16:
   push   rbp
   call   printf
   pop    rbp
-L17:
+L10:
   push qword[colday$11]
   mov rax,1
   push rax
@@ -424,6 +446,7 @@ L17:
   pop rax
   add rax,rbx
   push rax
+  pop qword[colday$11]
   push qword[dday$5]
   mov rax,1
   push rax
@@ -431,8 +454,9 @@ L17:
   pop rax
   add rax,rbx
   push rax
-  jmp L14
-L15:
+  pop qword[dday$5]
+  jmp L12
+L13:
   mov    rdi,fmt4
   mov    rax,0
   push   rbp
@@ -445,8 +469,9 @@ L15:
   pop rax
   add rax,rbx
   push rax
-  jmp L12
-L13:
+  pop qword[row$10]
+  jmp L14
+L15:
   mov    rdi,fmt5
   mov    rax,0
   push   rbp
@@ -486,13 +511,13 @@ J26:
   push rax
   pop rax
   cmp rax,0
-  je L18
+  je L16
   mov rax,0
   push rax
   pop rax
   push r15
   ret
-L18:
+L16:
   push qword[year$12]
   mov rax,100
   push rax
@@ -520,13 +545,13 @@ J28:
   push rax
   pop rax
   cmp rax,0
-  je L20
+  je L17
   mov rax,1
   push rax
   pop rax
   push r15
   ret
-L20:
+L17:
   push qword[year$12]
   mov rax,400
   push rax
@@ -554,13 +579,13 @@ J30:
   push rax
   pop rax
   cmp rax,0
-  je L22
+  je L18
   mov rax,1
   push rax
   pop rax
   push r15
   ret
-L22:
+L18:
   mov rax,0
   push rax
   pop rax
@@ -584,7 +609,7 @@ J32:
   push rax
   pop rax
   cmp rax,0
-  je L24
+  je L19
   mov    rdi,fmt6
   mov    rax,0
   push   rbp
@@ -595,7 +620,7 @@ J32:
   pop rax
   push r15
   ret
-L24:
+L19:
   push qword[month$13]
   mov rax,2
   push rax
@@ -611,7 +636,7 @@ J34:
   push rax
   pop rax
   cmp rax,0
-  je L26
+  je L20
   mov    rdi,fmt7
   mov    rax,0
   push   rbp
@@ -622,7 +647,7 @@ J34:
   pop rax
   push r15
   ret
-L26:
+L20:
   push qword[month$13]
   mov rax,3
   push rax
@@ -638,7 +663,7 @@ J36:
   push rax
   pop rax
   cmp rax,0
-  je L28
+  je L21
   mov    rdi,fmt8
   mov    rax,0
   push   rbp
@@ -649,7 +674,7 @@ J36:
   pop rax
   push r15
   ret
-L28:
+L21:
   push qword[month$13]
   mov rax,4
   push rax
@@ -665,7 +690,7 @@ J38:
   push rax
   pop rax
   cmp rax,0
-  je L30
+  je L22
   mov    rdi,fmt9
   mov    rax,0
   push   rbp
@@ -676,7 +701,7 @@ J38:
   pop rax
   push r15
   ret
-L30:
+L22:
   push qword[month$13]
   mov rax,5
   push rax
@@ -692,7 +717,7 @@ J40:
   push rax
   pop rax
   cmp rax,0
-  je L32
+  je L23
   mov    rdi,fmt10
   mov    rax,0
   push   rbp
@@ -703,7 +728,7 @@ J40:
   pop rax
   push r15
   ret
-L32:
+L23:
   push qword[month$13]
   mov rax,6
   push rax
@@ -719,7 +744,7 @@ J42:
   push rax
   pop rax
   cmp rax,0
-  je L34
+  je L24
   mov    rdi,fmt11
   mov    rax,0
   push   rbp
@@ -730,7 +755,7 @@ J42:
   pop rax
   push r15
   ret
-L34:
+L24:
   push qword[month$13]
   mov rax,7
   push rax
@@ -746,7 +771,7 @@ J44:
   push rax
   pop rax
   cmp rax,0
-  je L36
+  je L25
   mov    rdi,fmt12
   mov    rax,0
   push   rbp
@@ -757,7 +782,7 @@ J44:
   pop rax
   push r15
   ret
-L36:
+L25:
   push qword[month$13]
   mov rax,8
   push rax
@@ -773,7 +798,7 @@ J46:
   push rax
   pop rax
   cmp rax,0
-  je L38
+  je L26
   mov    rdi,fmt13
   mov    rax,0
   push   rbp
@@ -784,7 +809,7 @@ J46:
   pop rax
   push r15
   ret
-L38:
+L26:
   push qword[month$13]
   mov rax,9
   push rax
@@ -800,7 +825,7 @@ J48:
   push rax
   pop rax
   cmp rax,0
-  je L40
+  je L27
   mov    rdi,fmt14
   mov    rax,0
   push   rbp
@@ -811,7 +836,7 @@ J48:
   pop rax
   push r15
   ret
-L40:
+L27:
   push qword[month$13]
   mov rax,10
   push rax
@@ -827,7 +852,7 @@ J50:
   push rax
   pop rax
   cmp rax,0
-  je L42
+  je L28
   mov    rdi,fmt15
   mov    rax,0
   push   rbp
@@ -838,7 +863,7 @@ J50:
   pop rax
   push r15
   ret
-L42:
+L28:
   push qword[month$13]
   mov rax,11
   push rax
@@ -854,7 +879,7 @@ J52:
   push rax
   pop rax
   cmp rax,0
-  je L44
+  je L29
   mov    rdi,fmt16
   mov    rax,0
   push   rbp
@@ -865,7 +890,7 @@ J52:
   pop rax
   push r15
   ret
-L44:
+L29:
   push qword[month$13]
   mov rax,12
   push rax
@@ -881,7 +906,7 @@ J54:
   push rax
   pop rax
   cmp rax,0
-  je L46
+  je L30
   mov    rdi,fmt17
   mov    rax,0
   push   rbp
@@ -892,14 +917,14 @@ J54:
   pop rax
   push r15
   ret
-L46:
+L30:
   mov rax,1
   push rax
   pop rax
   push r15
   ret
 
-section .data
+  section .data
   fmt1: db `Su Mo Tu We Th Fr Sa\n`, 0
   fmt2: db `   `, 0
   fmt3: db `%2d `, 0

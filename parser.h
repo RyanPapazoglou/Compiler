@@ -107,7 +107,7 @@ private:
   int tindex;
   int jindex;
   SymbolTable* symbolTable;
-  string vars[100];
+  string vars[500];
 
   //string itos(int i) { stringstream ss; ss << i; string res = ss.str(); return res;}
   string itos(int i) { stringstream ss; ss << i; string res = ss.str(); return res;}
@@ -144,7 +144,7 @@ private:
   void emit(string);
   void isLabelGen(string);
   void vardefs(TreeNode *node);
-  
+  bool checkString(string);
   
   Parser(Lexer& lexer, ostream& out);
   ~Parser(); 

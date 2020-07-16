@@ -54,8 +54,10 @@ Token Lexer::nextToken(){
   //OPERATORS
   if(ispunct(ch)){
     lineNum = line;
-    lex += ch;
-    //ch = nextChar();
+    if(ch != '"'){
+      lex += ch;
+    }
+
     switch(ch){
     case '+':
       ch = nextChar();
@@ -98,6 +100,7 @@ Token Lexer::nextToken(){
       return Token(Token::SEMICOLON, lex, lineNum, pos);
       break;
     case '=':
+      //lex += ch;
       ch = nextChar();
       if(ch != '='){
 	//lex+=ch;
@@ -111,6 +114,7 @@ Token Lexer::nextToken(){
       }
       break;
     case '>':
+      //lex += ch;
       ch = nextChar();
       if(ch != '='){
 	//lex+=ch;
@@ -124,6 +128,7 @@ Token Lexer::nextToken(){
       }
       break;
     case '<':
+      //lex += ch;
       ch = nextChar();
       if(ch != '='){
 	//lex+=ch;
@@ -137,6 +142,7 @@ Token Lexer::nextToken(){
       }
       break;
     case '&':
+      //lex += ch;
       ch = nextChar();
       if(ch != '&'){
 	//lex+=ch;
@@ -151,27 +157,32 @@ Token Lexer::nextToken(){
       }
       break;
     case '|':
+      //lex += ch;
       ch = nextChar();
-      if(ch == '|'){
-	lex+=ch;
-	return Token(Token::OR, lex, lineNum, pos);
+      if(ch != '|'){
+	//lex+=ch;
+	//return Token(Token::OR, lex, lineNum, pos);
 	break;
       }else{
+	lex+=ch;
 	ch = nextChar();
 	//cout << "Invalid Token: "<< lex << " " << lineNum << " " + pos << endl;
-	return Token(Token::ERROR, lex, lineNum, pos);
+	return Token(Token::OR, lex, lineNum, pos);
 	break;
       }
       break;
     case '!':
+      //lex += ch;
       ch=nextChar();
-      if(ch == '='){
-	lex+=ch;
-	return Token(Token::NE, lex, lineNum, pos);
+      if(ch != '='){
+	//lex+=ch;
+	//return Token(Token::NE, lex, lineNum, pos);
+	break;
       }else{
+	lex+=ch;
 	ch = nextChar();
 	//cout << "Invalid Token: " << lex << " " << lineNum << " " + pos << endl;
-	return Token(Token::ERROR, lex, lineNum, pos);
+	return Token(Token::NE, lex, lineNum, pos);
       }
       break;
     case '"':
@@ -181,11 +192,161 @@ Token Lexer::nextToken(){
 	lineNum = line;
 	ch=nextChar();
       }
-      lex += ch;
+      //lex += ch;
       ch = nextChar();
       return Token(Token::STRINGLIT, lex, lineNum, pos);
       break;
     }
+    //ch = nextChar();
+    /*switch(ch){
+    case '+':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::PLUS, lex, lineNum, pos);
+      break;
+    case '-':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::MINUS, lex, lineNum, pos);
+      break;
+    case '*':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::TIMES, lex, lineNum, pos);
+      break;
+    case '/':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::DIVIDE, lex, lineNum, pos);
+      break;
+    case '(':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::LPAREN, lex, lineNum, pos);
+      break;
+    case ')':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::RPAREN, lex, lineNum, pos);
+      break;
+    case '{':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::LBRACE, lex, lineNum, pos);
+      break;
+    case '}':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::RBRACE, lex, lineNum, pos);
+      break;
+    case ',':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::COMMA, lex, lineNum, pos);
+      break;
+    case ';':
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::SEMICOLON, lex, lineNum, pos);
+      break;
+    case '=':
+      //lex += ch;
+      ch = nextChar();
+      if(ch != '='){
+	//lex+=ch;
+	return Token(Token::ASSIGN, lex, lineNum, pos);
+	break;
+      }else{	
+	lex+=ch;
+	ch = nextChar();
+	return Token(Token::EQ, lex, lineNum, pos);
+	break;
+      }
+      break;
+    case '>':
+      //lex += ch;
+      ch = nextChar();
+      if(ch != '='){
+	//lex+=ch;
+	return Token(Token::GT, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	return Token(Token::GE, lex, lineNum, pos);
+	break;
+      }
+      break;
+    case '<':
+      //lex += ch;
+      ch = nextChar();
+      if(ch != '='){
+	//lex+=ch;
+	return Token(Token::LT, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	return Token(Token::LE, lex, lineNum, pos);
+	break;
+      }
+      break;
+    case '&':
+      //lex += ch;
+      ch = nextChar();
+      if(ch != '&'){
+	//lex+=ch;
+	//return Token(Token::ERROR, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	//cout << "Invalid Token: " << lex << " " << lineNum << " " << pos << endl;
+	return Token(Token::AND, lex, lineNum, pos);
+	break;
+      }
+      break;
+    case '|':
+      //lex += ch;
+      ch = nextChar();
+      if(ch != '|'){
+	//lex+=ch;
+	//return Token(Token::OR, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	//cout << "Invalid Token: "<< lex << " " << lineNum << " " + pos << endl;
+	return Token(Token::OR, lex, lineNum, pos);
+	break;
+      }
+      break;
+    case '!':
+      //lex += ch;
+      ch=nextChar();
+      if(ch != '='){
+	//lex+=ch;
+	//return Token(Token::NE, lex, lineNum, pos);
+	break;
+      }else{
+	lex+=ch;
+	ch = nextChar();
+	//cout << "Invalid Token: " << lex << " " << lineNum << " " + pos << endl;
+	return Token(Token::NE, lex, lineNum, pos);
+      }
+      break;
+    case '"':
+      ch=nextChar();
+      while(ch != '"'){
+	lex += ch;
+	lineNum = line;
+	ch=nextChar();
+      }
+      //lex += ch;
+      ch = nextChar();
+      return Token(Token::STRINGLIT, lex, lineNum, pos);
+      break;
+      }*/
   }
 
   if(ch == '#'){
